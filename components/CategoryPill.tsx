@@ -65,7 +65,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
-    fontSize: 13,
+    fontSize: 14,
+    fontFamily: 'SourGummy-Bold',
     letterSpacing: -0.2,
   },
 });

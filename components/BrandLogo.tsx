@@ -5,21 +5,39 @@ interface BrandLogoProps {
   variant?: 'full' | 'letter';
   size?: number;
   color?: string;
+  outlineColor?: string;
 }
 
 export const BrandLogo: React.FC<BrandLogoProps> = ({
   variant = 'full',
   size = 48,
   color = '#FFFFFF',
+  outlineColor = '#000000',
 }) => {
   if (variant === 'letter') {
     return (
-      <View style={[styles.letterContainer, { width: size * 1.3, height: size * 1.5 }]}>
+      <View style={[styles.letterContainer, { width: size * 1.4, height: size * 1.6 }]}>
+        {/* Outline shadow layer for authentic Figma look */}
         <Text
           style={[
             styles.letterLogo,
             {
-              fontSize: size * 1.3,
+              fontSize: size * 1.4,
+              color: outlineColor,
+              position: 'absolute',
+              textShadowColor: outlineColor,
+              textShadowOffset: { width: 1, height: 1 },
+              textShadowRadius: 2,
+            },
+          ]}
+        >
+          M
+        </Text>
+        <Text
+          style={[
+            styles.letterLogo,
+            {
+              fontSize: size * 1.4,
               color,
             },
           ]}
@@ -32,6 +50,22 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 
   return (
     <View style={styles.fullContainer}>
+      {/* Background outline layers for crisp stroke */}
+      <Text
+        style={[
+          styles.fullLogo,
+          {
+            fontSize: size,
+            color: outlineColor,
+            position: 'absolute',
+            textShadowColor: outlineColor,
+            textShadowOffset: { width: 1.5, height: 1.5 },
+            textShadowRadius: 1,
+          },
+        ]}
+      >
+        Muted
+      </Text>
       <Text
         style={[
           styles.fullLogo,
@@ -51,27 +85,19 @@ const styles = StyleSheet.create({
   fullContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   letterContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   fullLogo: {
-    fontFamily: 'System',
-    fontWeight: '800',
-    fontStyle: 'italic',
-    letterSpacing: -1.5,
-    textShadowColor: 'rgba(0, 0, 0, 0.25)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    fontFamily: 'MV-Boli',
+    letterSpacing: -1,
   },
   letterLogo: {
-    fontFamily: 'System',
-    fontWeight: '700',
-    fontStyle: 'italic',
-    letterSpacing: -2,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 4 },
-    textShadowRadius: 8,
+    fontFamily: 'MV-Boli',
+    letterSpacing: -1,
   },
 });

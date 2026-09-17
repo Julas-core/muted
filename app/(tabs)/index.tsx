@@ -131,13 +131,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   mainTitle: {
-    fontSize: 38,
-    fontWeight: '900',
-    letterSpacing: -1.2,
+    fontSize: 42,
+    fontFamily: 'SourGummy-Black',
+    letterSpacing: -1,
   },
   subTitle: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 16,
+    fontFamily: 'SourGummy-SemiBold',
     marginTop: 4,
     letterSpacing: -0.2,
   },

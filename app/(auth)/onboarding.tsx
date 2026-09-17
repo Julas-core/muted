@@ -204,10 +204,10 @@ const styles = StyleSheet.create({
     paddingBottom: 110,
   },
   title: {
-    fontSize: 34,
-    fontWeight: '900',
+    fontSize: 36,
+    fontFamily: 'SourGummy-Black',
     letterSpacing: -1,
-    lineHeight: 40,
+    lineHeight: 44,
     marginBottom: 24,
   },
   grid: {
@@ -241,8 +241,8 @@ const styles = StyleSheet.create({
   },
   tileName: {
     color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
+    fontFamily: 'SourGummy-Bold',
+    fontSize: 13,
     flex: 1,
     marginRight: 4,
     textShadowColor: 'rgba(0,0,0,0.5)',
@@ -250,9 +250,9 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   checkCircle: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.8)',
     alignItems: 'center',
@@ -264,23 +264,23 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   fallbackTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 18,
+    fontFamily: 'SourGummy-Bold',
     marginBottom: 10,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 48,
-    borderRadius: 24,
-    paddingHorizontal: 16,
+    height: 52,
+    borderRadius: 26,
+    paddingHorizontal: 18,
     borderWidth: 1,
   },
   searchInput: {
     flex: 1,
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '500',
+    fontFamily: 'SourGummy-Medium',
+    fontSize: 15,
   },
   previewContainer: {
     flex: 1,
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
   nextButtonText: {
     color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
+    fontFamily: 'SourGummy-Bold',
+    fontSize: 18,
   },
 });
