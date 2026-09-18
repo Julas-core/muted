@@ -176,7 +176,8 @@ const styles = StyleSheet.create({
     borderRadius: 2.5,
   },
   tabLabel: {
-    fontSize: 11,
+    fontSize: 12,
+    fontFamily: 'SourGummy-Bold',
     marginTop: 2,
   },
 });

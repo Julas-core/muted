@@ -301,8 +301,8 @@ const styles = StyleSheet.create({
   },
   uploadPillText: {
     color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 13,
+    fontFamily: 'SourGummy-Bold',
+    fontSize: 14,
     marginLeft: 4,
   },
   iconButton: {
@@ -341,12 +341,13 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   userName: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 24,
+    fontFamily: 'SourGummy-Black',
     letterSpacing: -0.5,
   },
   userEmail: {
-    fontSize: 13,
+    fontSize: 14,
+    fontFamily: 'SourGummy-Medium',
     marginTop: 3,
   },
   statsRow: {
@@ -361,11 +362,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 26,
+    fontFamily: 'SourGummy-Black',
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 13,
+    fontFamily: 'SourGummy-Bold',
     marginTop: 2,
   },
   statDivider: {
@@ -378,7 +380,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   tabPill: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 18,
     marginHorizontal: 4,
@@ -387,7 +389,8 @@ const styles = StyleSheet.create({
   },
   tabPillActive: {},
   tabPillText: {
-    fontSize: 13,
+    fontSize: 14,
+    fontFamily: 'SourGummy-Bold',
   },
   masonryContainer: {
     flexDirection: 'row',

@@ -196,8 +196,8 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   heading: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 22,
+    fontFamily: 'SourGummy-Black',
   },
   closeBtn: {
     padding: 6,
@@ -231,21 +231,22 @@ const styles = StyleSheet.create({
   },
   changeImageText: {
     color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 13,
+    fontFamily: 'SourGummy-Bold',
     marginLeft: 6,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontFamily: 'SourGummy-Bold',
     marginBottom: 8,
   },
   input: {
-    height: 50,
+    height: 52,
     borderRadius: 16,
     paddingHorizontal: 16,
     borderWidth: 1,
     fontSize: 15,
+    fontFamily: 'SourGummy-Medium',
   },
   categoriesRow: {
     paddingBottom: 24,
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
   },
   categoryChipText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: 'SourGummy-Bold',
   },
   publishBtn: {
     height: 54,
@@ -275,7 +276,7 @@ const styles = StyleSheet.create({
   },
   publishBtnText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontFamily: 'SourGummy-Bold',
   },
 });

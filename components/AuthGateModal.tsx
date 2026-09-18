@@ -211,13 +211,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 24,
+    fontFamily: 'SourGummy-Black',
     marginTop: 8,
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
+    fontFamily: 'SourGummy-Medium',
     marginTop: 4,
     textAlign: 'center',
   },
@@ -225,8 +226,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   inputLabel: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 13,
+    fontFamily: 'SourGummy-Bold',
     marginBottom: 6,
     marginLeft: 4,
   },
@@ -244,6 +245,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 15,
+    fontFamily: 'SourGummy-Medium',
     height: '100%',
   },
   continueButton: {
@@ -259,8 +261,8 @@ const styles = StyleSheet.create({
   },
   continueButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontFamily: 'SourGummy-Bold',
   },
   dividerRow: {
     flexDirection: 'row',
@@ -273,7 +275,8 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     paddingHorizontal: 12,
-    fontSize: 13,
+    fontSize: 14,
+    fontFamily: 'SourGummy-Bold',
   },
   googleButton: {
     height: 52,
@@ -291,7 +294,7 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: 'SourGummy-Bold',
   },
   guestLink: {
     alignItems: 'center',
@@ -299,8 +302,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   guestLinkText: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 14,
+    fontFamily: 'SourGummy-Bold',
   },
   legalText: {
     fontSize: 11,

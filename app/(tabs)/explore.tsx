@@ -204,8 +204,8 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
+    fontFamily: 'SourGummy-Medium',
     fontSize: 15,
-    fontWeight: '500',
   },
   clearButton: {
     padding: 4,
@@ -227,13 +227,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontFamily: 'SourGummy-Bold',
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 14,
+    fontSize: 15,
+    fontFamily: 'SourGummy-Medium',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 22,
   },
 });

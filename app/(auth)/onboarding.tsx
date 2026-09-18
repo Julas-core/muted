@@ -17,6 +17,7 @@ import * as Haptics from 'expo-haptics';
 import { CATEGORIES } from '../../constants/categories';
 import { useWallpaperStore } from '../../store/useWallpaperStore';
 import { useThemeStore } from '../../store/useThemeStore';
+import { useAuthStore } from '../../store/useAuthStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TILE_WIDTH = (SCREEN_WIDTH - 56) / 3;
@@ -49,7 +50,9 @@ export default function OnboardingScreen() {
     );
   };
 
-  const handleNext = () => {
+  const { setOnboardingComplete, updateProfileData } = useAuthStore();
+
+  const handleNext = async () => {
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (_) {}
@@ -60,8 +63,10 @@ export default function OnboardingScreen() {
         finalTastes.push(customSearch.trim().toLowerCase());
       }
       setTastes(finalTastes);
+      updateProfileData({ categories: finalTastes });
       setStep('preview');
     } else {
+      await setOnboardingComplete(true);
       router.replace('/(tabs)');
     }
   };
