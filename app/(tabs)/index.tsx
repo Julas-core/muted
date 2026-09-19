@@ -13,10 +13,9 @@ import * as Haptics from 'expo-haptics';
 import { useWallpaperStore } from '../../store/useWallpaperStore';
 import { useThemeStore } from '../../store/useThemeStore';
 import { WallpaperCard } from '../../components/WallpaperCard';
-import { BrandLogo } from '../../components/BrandLogo';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const COLUMN_WIDTH = (SCREEN_WIDTH - 44) / 2;
+const COLUMN_WIDTH = (SCREEN_WIDTH - 100) / 2;
 
 export default function HomeFeedScreen() {
   const { colors, isDark } = useThemeStore();
@@ -59,7 +58,7 @@ export default function HomeFeedScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={colors.backgroundGradient}
+        colors={isDark ? colors.backgroundGradient : ['#1973F0', '#64A0F1', '#E2F0FF']}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -77,14 +76,8 @@ export default function HomeFeedScreen() {
             />
           }
         >
-          {/* Header matching screens 9, 10, 13 */}
           <View style={styles.header}>
-            <View style={styles.titleRow}>
-              <Text style={[styles.mainTitle, { color: isDark ? '#FFFFFF' : '#0B2050' }]}>
-                Home
-              </Text>
-              <BrandLogo variant="letter" size={32} color={isDark ? '#FFFFFF' : '#0B2050'} />
-            </View>
+            <Text style={[styles.mainTitle, { color: isDark ? '#FFFFFF' : '#111111' }]}>Discover</Text>
             <Text style={[styles.subTitle, { color: isDark ? '#D4D4D8' : '#334155' }]}>
               Curated wallpapers to match your mood.
             </Text>
@@ -117,29 +110,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingHorizontal: 30,
+    paddingTop: 0,
     paddingBottom: 110, // padding for floating tab bar
   },
   header: {
-    marginBottom: 20,
-    marginTop: 4,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    marginBottom: 40,
+    marginTop: 0,
   },
   mainTitle: {
-    fontSize: 42,
+    fontSize: 68,
+    lineHeight: 78,
     fontFamily: 'SourGummy-Black',
-    letterSpacing: -1,
+    letterSpacing: -2,
   },
   subTitle: {
-    fontSize: 16,
+    fontSize: 17,
+    lineHeight: 22,
     fontFamily: 'SourGummy-SemiBold',
-    marginTop: 4,
-    letterSpacing: -0.2,
+    marginTop: 5,
+    marginLeft: 6,
+    letterSpacing: -0.35,
   },
   masonryContainer: {
     flexDirection: 'row',

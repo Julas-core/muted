@@ -116,16 +116,17 @@ export const WallpaperCard: React.FC<WallpaperCardProps> = ({
           transition={250}
         />
 
-        {/* Subtle overlay gradient */}
         <View style={styles.gradientOverlay} />
 
         {/* Floating Author Pill */}
         <View style={styles.bottomRow}>
-          <View style={styles.authorPill}>
-            <Image source={{ uri: wallpaper.authorAvatar }} style={styles.authorAvatar} />
-            <Text style={styles.authorText} numberOfLines={1}>
-              {wallpaper.author}
-            </Text>
+          <View
+            style={styles.authorPill}
+            accessible
+            accessibilityLabel={`Wallpaper by ${wallpaper.author}`}
+          >
+            <View style={styles.authorBarLong} />
+            <View style={styles.authorBarShort} />
           </View>
 
           {/* Heart Favorite Button with Spring Bounce */}
@@ -140,7 +141,7 @@ export const WallpaperCard: React.FC<WallpaperCardProps> = ({
             <Animated.View style={{ transform: [{ scale: heartScaleAnim }] }}>
               <Heart
                 size={16}
-                color={isFavorite ? colors.heartActive : '#FFFFFF'}
+                color={isFavorite ? colors.heartActive : '#858585'}
                 fill={isFavorite ? colors.heartActive : 'transparent'}
                 strokeWidth={2}
               />
@@ -154,22 +155,17 @@ export const WallpaperCard: React.FC<WallpaperCardProps> = ({
 
 const styles = StyleSheet.create({
   cardContainer: {
-    borderRadius: 20,
+    borderRadius: 18,
     overflow: 'hidden',
-    marginBottom: 12,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4,
+    marginBottom: 18,
+    borderWidth: 0,
   },
   image: {
     ...StyleSheet.absoluteFill,
   },
   gradientOverlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0, 0, 0, 0.12)',
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
   },
   bottomRow: {
     position: 'absolute',
@@ -183,29 +179,36 @@ const styles = StyleSheet.create({
   authorPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 14,
-    maxWidth: '68%',
+    backgroundColor: 'transparent',
+    width: '64%',
+    paddingVertical: 0,
+    borderRadius: 0,
   },
   authorAvatar: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginRight: 6,
+    width: 0,
+    height: 0,
   },
   authorText: {
-    color: '#FFFFFF',
-    fontFamily: 'SourGummy-Bold',
-    fontSize: 12,
+    color: 'transparent',
+    fontSize: 1,
   },
   heartButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  authorBarLong: {
+    width: '100%',
+    height: 14,
+    backgroundColor: '#858585',
+    marginBottom: 4,
+  },
+  authorBarShort: {
+    width: '72%',
+    height: 7,
+    backgroundColor: '#858585',
   },
 });

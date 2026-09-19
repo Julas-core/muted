@@ -20,7 +20,7 @@ import { WallpaperCard } from '../../components/WallpaperCard';
 import { BrandLogo } from '../../components/BrandLogo';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const COLUMN_WIDTH = (SCREEN_WIDTH - 44) / 2;
+const COLUMN_WIDTH = (SCREEN_WIDTH - 100) / 2;
 
 export default function ExploreScreen() {
   const { colors, isDark } = useThemeStore();
@@ -83,7 +83,7 @@ export default function ExploreScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={colors.backgroundGradient}
+        colors={isDark ? colors.backgroundGradient : ['#FFFFFF', '#DDEEFF', '#1973F0']}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -94,9 +94,13 @@ export default function ExploreScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Header with script "Muted" wordmark matching Screen 25 */}
           <View style={styles.header}>
-            <BrandLogo variant="full" size={54} color={isDark ? '#FFFFFF' : '#0B2050'} />
+            <BrandLogo
+              variant="full"
+              size={66}
+              color="#FFFFFF"
+              outlineColor={isDark ? '#FFFFFF' : '#111111'}
+            />
           </View>
 
           {/* Search Bar matching Screen 9, 25 */}
@@ -104,8 +108,8 @@ export default function ExploreScreen() {
             style={[
               styles.searchBarContainer,
               {
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.85)',
-                borderColor: colors.border,
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : '#FFFFFF',
+                borderColor: isDark ? colors.border : '#D5D5D5',
               },
             ]}
           >
@@ -177,27 +181,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingHorizontal: 30,
+    paddingTop: 0,
     paddingBottom: 110,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 15,
+    marginTop: 6,
   },
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 50,
+    height: 49,
     borderRadius: 25,
     paddingHorizontal: 16,
     marginBottom: 16,
     borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
   },
   searchIcon: {
     marginRight: 10,
@@ -211,7 +211,8 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   pillRow: {
-    paddingBottom: 18,
+    paddingBottom: 28,
+    marginHorizontal: -13,
   },
   masonryContainer: {
     flexDirection: 'row',

@@ -20,7 +20,7 @@ export interface ColorScheme {
 
 export const lightTheme: ColorScheme = {
   isDark: false,
-  backgroundGradient: ['#3A8DFF', '#73AEFF', '#D4E7FF'],
+  backgroundGradient: ['#1973F0', '#64A0F1', '#E2F0FF'],
   surface: '#FFFFFF',
   surfaceGlass: 'rgba(255, 255, 255, 0.75)',
   cardBg: 'rgba(255, 255, 255, 0.9)',

@@ -32,10 +32,8 @@ export const CategoryPill: React.FC<CategoryPillProps> = ({
         {
           backgroundColor: isActive
             ? colors.pillActiveBg
-            : isDark
-            ? 'rgba(255, 255, 255, 0.15)'
-            : 'rgba(0, 0, 0, 0.45)',
-          borderColor: isActive ? colors.primary : 'rgba(255, 255, 255, 0.15)',
+            : isDark ? 'rgba(255, 255, 255, 0.15)' : '#8B8787',
+          borderColor: isActive ? colors.primary : 'transparent',
         },
       ]}
     >
@@ -43,7 +41,7 @@ export const CategoryPill: React.FC<CategoryPillProps> = ({
         style={[
           styles.text,
           {
-            color: isActive ? colors.pillActiveText : '#FFFFFF',
+            color: isActive ? colors.pillActiveText : isDark ? '#FFFFFF' : '#111111',
             fontWeight: isActive ? '700' : '600',
           },
         ]}
@@ -60,7 +58,7 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: 22,
     marginRight: 8,
-    borderWidth: 1,
+    borderWidth: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

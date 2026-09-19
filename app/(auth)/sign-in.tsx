@@ -12,38 +12,20 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../../store/useAuthStore';
 import { GoogleIcon } from '../../components/GoogleIcon';
-import { SEED_WALLPAPERS } from '../../constants/seedWallpapers';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Card dimensions for the 2×3 mosaic grid
-const CARD_GAP = 8;
-const GRID_PAD_H = 10;
-const COL_WIDTH = (SCREEN_WIDTH - GRID_PAD_H * 2 - CARD_GAP) / 2;
-const ROW_HEIGHT = (SCREEN_HEIGHT * 0.52) / 3;
-
-// Collage images – pick visually striking ones from seed
-const COLLAGE_IMAGES = [
-  SEED_WALLPAPERS[6]?.url || 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=600&q=80', // car / cyberpunk
-  SEED_WALLPAPERS[0]?.url || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&q=80', // cloud ape
-  SEED_WALLPAPERS[3]?.url || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80', // dark grain
-  SEED_WALLPAPERS[7]?.url || 'https://images.unsplash.com/photo-1508974239320-0a029497e820?w=600&q=80', // oakley visor
-  SEED_WALLPAPERS[9]?.url || 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&q=80', // comic
-  SEED_WALLPAPERS[2]?.url || 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?w=600&q=80', // tiger
-];
-
-// Each tile's slight rotation for the organic collage feel
-const TILE_ROTATIONS = ['-4deg', '3deg', '-3deg', '2deg', '-2deg', '4deg'];
+// The cropped header image is 440 x 585 (from collage top down to just below 'Muted' wordmark)
+const HEADER_ASPECT_RATIO = 585 / 440;
+const HEADER_HEIGHT = SCREEN_WIDTH * HEADER_ASPECT_RATIO;
 
 export default function SignInScreen() {
-  const router = useRouter();
-  const { signInWithEmail, signInWithGoogle, setGuestMode, isLoading } = useAuthStore();
+  const { signInWithEmail, signInWithGoogle, isLoading } = useAuthStore();
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -53,10 +35,15 @@ export default function SignInScreen() {
       return;
     }
     setErrorMessage(null);
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (_) {}
+
     const result = await signInWithEmail(email.trim());
     if (result.success) {
-      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (_) {}
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch (_) {}
     } else {
       setErrorMessage(result.error || 'Failed to sign in. Please try again.');
     }
@@ -64,37 +51,44 @@ export default function SignInScreen() {
 
   const handleGoogleSignIn = async () => {
     setErrorMessage(null);
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (_) {}
+
     const result = await signInWithGoogle();
     if (result.success) {
-      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (_) {}
+      try {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch (_) {}
     } else if (result.error) {
       setErrorMessage(result.error);
     }
   };
 
-  const handleGuestBrowse = () => {
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
-    setGuestMode();
-    router.replace('/(tabs)');
-  };
-
   const handleCreateAccount = () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (_) {}
     Alert.alert(
       'Create Account',
-      'Enter your email above and tap Continue to create your account instantly.',
+      'Enter your email in the box above and tap Continue to create your account instantly.',
       [{ text: 'Got it' }]
     );
   };
 
-  return (
-    <View style={styles.screen}>
-      {/* Solid light sky blue background */}
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: '#A8D4FE' }]} />
+  const handleTerms = () => {
+    Alert.alert('Terms of Service', 'Terms of Service for Muted.');
+  };
 
+  const handlePrivacy = () => {
+    Alert.alert('Privacy Policy', 'Privacy Policy for Muted.');
+  };
+
+  return (
+    <View style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ flex: 1 }}
+        style={styles.keyboardAvoid}
       >
         <ScrollView
           bounces={false}
@@ -102,80 +96,42 @@ export default function SignInScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {/* ── Top Collage Area ── */}
-          <View style={styles.collageSection}>
-            <View style={styles.collageGrid}>
-              {COLLAGE_IMAGES.map((uri, idx) => {
-                const row = Math.floor(idx / 2);
-                const col = idx % 2;
-                return (
-                  <View
-                    key={`tile-${idx}`}
-                    style={[
-                      styles.gridCard,
-                      {
-                        top: row * (ROW_HEIGHT + CARD_GAP),
-                        left: col === 0 ? 0 : COL_WIDTH + CARD_GAP,
-                        width: COL_WIDTH,
-                        height: ROW_HEIGHT - (row === 0 ? 0 : 0),
-                        transform: [{ rotate: TILE_ROTATIONS[idx] }],
-                      },
-                    ]}
-                  >
-                    <Image
-                      source={{ uri }}
-                      style={styles.cardImage}
-                      contentFit="cover"
-                      transition={200}
-                    />
-                  </View>
-                );
-              })}
-            </View>
+          {/* Header image: Collage + Muted display wordmark cropped from design */}
+          <Image
+            source={require('../../assets/images/signin-header.png')}
+            style={{ width: SCREEN_WIDTH, height: HEADER_HEIGHT }}
+            contentFit="cover"
+          />
 
-            {/* "Muted" hand-lettered wordmark overlapping bottom of collage */}
-            <View style={styles.wordmarkWrap}>
-              {/* Black stroke outline via text shadow layers */}
-              <Text style={[styles.wordmark, styles.wordmarkStroke,
-                { textShadowOffset: { width: -2, height: -2 } }]}>Muted</Text>
-              <Text style={[styles.wordmark, styles.wordmarkStroke,
-                { textShadowOffset: { width: 2, height: -2 } }]}>Muted</Text>
-              <Text style={[styles.wordmark, styles.wordmarkStroke,
-                { textShadowOffset: { width: -2, height: 2 } }]}>Muted</Text>
-              <Text style={[styles.wordmark, styles.wordmarkStroke,
-                { textShadowOffset: { width: 2, height: 2 } }]}>Muted</Text>
-              <Text style={[styles.wordmark, styles.wordmarkStroke,
-                { textShadowOffset: { width: 0, height: -3 } }]}>Muted</Text>
-              <Text style={[styles.wordmark, styles.wordmarkStroke,
-                { textShadowOffset: { width: 0, height: 3 } }]}>Muted</Text>
-              <Text style={[styles.wordmark, styles.wordmarkStroke,
-                { textShadowOffset: { width: -3, height: 0 } }]}>Muted</Text>
-              <Text style={[styles.wordmark, styles.wordmarkStroke,
-                { textShadowOffset: { width: 3, height: 0 } }]}>Muted</Text>
-              {/* White fill on top */}
-              <Text style={[styles.wordmark, { color: '#FFFFFF' }]}>Muted</Text>
-            </View>
-          </View>
+          {/* This gradient begins at the exact final pixel of the header crop. */}
+          <LinearGradient
+            colors={['#97BEF7', '#E8F0FD']}
+            style={[styles.formBackground, { minHeight: SCREEN_HEIGHT - HEADER_HEIGHT }]}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+          >
+            {/* Form controls below wordmark */}
+            <View style={styles.formContainer}>
+              <Text style={styles.signInLabel}>Sign In</Text>
 
-          {/* ── White form sheet ── */}
-          <View style={styles.formSheet}>
-            {/* Sign In header – italic bold */}
-            <Text style={styles.signInLabel}>Sign In</Text>
+              {errorMessage ? (
+                <View style={styles.errorBanner}>
+                  <Text style={styles.errorText}>{errorMessage}</Text>
+                </View>
+              ) : null}
 
-            {errorMessage ? (
-              <View style={styles.errorBanner}>
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              </View>
-            ) : null}
-
-            {/* Email input – light rounded pill with stacked label */}
-            <View style={styles.emailContainer}>
-              <Text style={styles.emailLabel}>Email</Text>
+            {/* Light rounded pill with stacked 'Email' label + input */}
+            <View style={styles.emailPill}>
+              <Text style={styles.emailSubLabel}>Email</Text>
               <TextInput
+                accessibilityLabel="Email address"
                 placeholder="Enter your email address"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#6B7280"
                 value={email}
-                onChangeText={(t) => { setEmail(t); if (errorMessage) setErrorMessage(null); }}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (errorMessage) setErrorMessage(null);
+                }}
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="email-address"
@@ -183,54 +139,65 @@ export default function SignInScreen() {
               />
             </View>
 
-            {/* Black Continue button */}
+            {/* Black Continue pill button */}
             <TouchableOpacity
+              accessibilityLabel="Continue with email"
               onPress={handleContinue}
               disabled={isLoading}
               activeOpacity={0.85}
-              style={styles.continueBtn}
+              style={styles.continueButton}
             >
               {isLoading ? (
-                <ActivityIndicator color="#FFF" size="small" />
+                <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
-                <Text style={styles.continueBtnText}>Continue</Text>
+                <Text style={styles.continueButtonText}>Continue</Text>
               )}
             </TouchableOpacity>
 
-            {/* Or divider */}
+            {/* Or Divider */}
             <View style={styles.orRow}>
               <View style={styles.orLine} />
               <Text style={styles.orText}>Or</Text>
               <View style={styles.orLine} />
             </View>
 
-            {/* Continue with Google – white outlined pill */}
+            {/* White Continue with Google button with blue border */}
             <TouchableOpacity
+              accessibilityLabel="Continue with Google"
               onPress={handleGoogleSignIn}
               disabled={isLoading}
               activeOpacity={0.85}
-              style={styles.googleBtn}
+              style={styles.googleButton}
             >
               <GoogleIcon size={20} />
-              <Text style={styles.googleBtnText}>Continue with Google</Text>
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
             </TouchableOpacity>
 
-            {/* Don't have an account? Create one */}
-            <View style={styles.createRow}>
-              <Text style={styles.createPrompt}>Don't have an account ?  </Text>
-              <TouchableOpacity onPress={handleCreateAccount} activeOpacity={0.7}>
-                <Text style={styles.createLink}>Create one</Text>
+            {/* Don't have an account ? Create one */}
+            <View style={styles.createAccountRow}>
+              <Text style={styles.dontHaveAccountText}>Don't have an account ? </Text>
+              <TouchableOpacity
+                accessibilityLabel="Create an account"
+                onPress={handleCreateAccount}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.createOneLink}>Create one</Text>
               </TouchableOpacity>
             </View>
 
-            {/* Legal text */}
-            <Text style={styles.legalText}>
+            {/* Legal terms & privacy notice */}
+            <Text style={styles.legalNotice}>
               By Continuing you agree to Muted's{' '}
-              <Text style={styles.legalLink}>Terms or Service</Text>
+              <Text onPress={handleTerms} style={styles.legalLink}>
+                Terms or Service
+              </Text>
               {' '}and{'\n'}acknowledge that you've read our{'\n'}
-              <Text style={styles.legalLink}>Privacy Policy.</Text>
+              <Text onPress={handlePrivacy} style={styles.legalLink}>
+                Privacy Policy.
+              </Text>
             </Text>
-          </View>
+            </View>
+          </LinearGradient>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -238,201 +205,145 @@ export default function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  container: {
     flex: 1,
-    backgroundColor: '#A8D4FE',
+    backgroundColor: '#97BEF7',
+  },
+  keyboardAvoid: {
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
   },
-
-  /* ── Collage ── */
-  collageSection: {
-    height: SCREEN_HEIGHT * 0.56,
-    position: 'relative',
-    overflow: 'visible',
+  formBackground: {
+    flexGrow: 1,
   },
-  collageGrid: {
-    position: 'absolute',
-    top: 0,
-    left: GRID_PAD_H,
-    right: GRID_PAD_H,
-    bottom: 60, // leave room for wordmark overlap
-  },
-  gridCard: {
-    position: 'absolute',
-    borderRadius: 14,
-    overflow: 'hidden',
-    backgroundColor: '#1A1A2E',
-    // Shadow for depth
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
-  },
-  cardImage: {
-    width: '100%',
-    height: '100%',
-  },
-
-  /* ── Wordmark ── */
-  wordmarkWrap: {
-    position: 'absolute',
-    bottom: -10,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 20,
-  },
-  wordmark: {
-    fontFamily: 'MV-Boli',
-    fontSize: 80,
-    fontStyle: 'italic',
-    letterSpacing: -1,
-  },
-  wordmarkStroke: {
-    position: 'absolute',
-    color: '#000000',
-    textShadowColor: '#000000',
-    textShadowRadius: 0,
-  },
-
-  /* ── White form sheet ── */
-  formSheet: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 36,
-    minHeight: SCREEN_HEIGHT * 0.44,
+  formContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
   },
   signInLabel: {
-    fontSize: 20,
-    fontFamily: 'SourGummy-Bold',
-    fontStyle: 'italic',
-    color: '#111827',
-    marginBottom: 14,
+    fontSize: 18,
+    fontWeight: '400',
+    color: '#FFFFFF',
+    marginBottom: 4,
+    marginLeft: 20,
   },
   errorBanner: {
-    backgroundColor: '#FEE2E2',
-    borderRadius: 12,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+    borderRadius: 14,
     paddingVertical: 8,
     paddingHorizontal: 14,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   errorText: {
-    color: '#DC2626',
+    color: '#B91C1C',
     fontSize: 13,
-    fontFamily: 'SourGummy-Medium',
+    fontWeight: '500',
     textAlign: 'center',
   },
-
-  /* ── Email input ── */
-  emailContainer: {
-    backgroundColor: '#F3F4F6',
-    borderRadius: 16,
+  emailPill: {
+    height: 50,
+    backgroundColor: '#EDF4FE',
+    borderRadius: 25,
     paddingHorizontal: 18,
-    paddingTop: 10,
-    paddingBottom: 10,
-    marginBottom: 14,
+    paddingTop: 5,
+    marginBottom: 22,
   },
-  emailLabel: {
-    fontSize: 11,
-    fontFamily: 'SourGummy-Medium',
-    color: '#6B7280',
-    marginBottom: 2,
+  emailSubLabel: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#4B5563',
+    marginBottom: 0,
   },
   emailInput: {
-    fontSize: 17,
-    fontFamily: 'SourGummy-Regular',
+    fontSize: 21,
     color: '#111827',
     paddingVertical: 0,
-    height: 26,
+    height: 27,
+    fontWeight: '400',
   },
-
-  /* ── Continue button ── */
-  continueBtn: {
+  continueButton: {
     backgroundColor: '#000000',
-    height: 52,
-    borderRadius: 26,
+    height: 42,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#4B5563',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  continueBtnText: {
+  continueButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontFamily: 'SourGummy-Bold',
+    fontWeight: '400',
   },
-
-  /* ── Or divider ── */
   orRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 14,
+    marginVertical: 10,
+    paddingHorizontal: 48,
   },
   orLine: {
     flex: 1,
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#D1D5DB',
+    height: 1,
+    backgroundColor: '#1E293B',
+    opacity: 0.7,
   },
   orText: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 24,
     fontSize: 14,
-    fontFamily: 'SourGummy-Medium',
-    color: '#6B7280',
+    color: '#1E293B',
+    fontWeight: '400',
   },
-
-  /* ── Google button ── */
-  googleBtn: {
+  googleButton: {
     backgroundColor: '#FFFFFF',
-    height: 52,
-    borderRadius: 26,
+    height: 38,
+    borderRadius: 6,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginHorizontal: 9,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: '#3B82F6',
   },
-  googleBtnText: {
+  googleButtonText: {
     color: '#111827',
-    fontSize: 15,
-    fontFamily: 'SourGummy-Bold',
+    fontSize: 16,
+    fontWeight: '400',
     marginLeft: 10,
   },
-
-  /* ── Create account ── */
-  createRow: {
+  createAccountRow: {
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 18,
   },
-  createPrompt: {
-    fontSize: 13,
-    fontFamily: 'SourGummy-Regular',
-    color: '#374151',
+  dontHaveAccountText: {
+    fontSize: 14,
+    color: '#111827',
+    fontWeight: '400',
   },
-  createLink: {
-    fontSize: 13,
-    fontFamily: 'SourGummy-Bold',
-    color: '#2563EB',
+  createOneLink: {
+    fontSize: 14,
+    color: '#1D70E2',
+    fontWeight: '600',
     textDecorationLine: 'underline',
   },
-
-  /* ── Legal ── */
-  legalText: {
-    fontSize: 12,
-    fontFamily: 'SourGummy-Regular',
-    color: '#374151',
+  legalNotice: {
+    fontSize: 16,
+    color: '#1F2937',
     textAlign: 'center',
-    lineHeight: 18,
-    marginTop: 24,
-    paddingHorizontal: 8,
+    lineHeight: 20,
+    marginTop: 28,
+    marginHorizontal: -14,
+    paddingHorizontal: 0,
+    fontWeight: '400',
   },
   legalLink: {
-    color: '#2563EB',
+    color: '#1D70E2',
+    fontWeight: '500',
     textDecorationLine: 'underline',
   },
 });

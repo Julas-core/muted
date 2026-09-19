@@ -11,20 +11,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { Edit2, LogOut, Sun, Moon, Plus, LogIn } from 'lucide-react-native';
+import { Edit2, LogOut, Plus, LogIn } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useWallpaperStore } from '../../store/useWallpaperStore';
 import { WallpaperCard } from '../../components/WallpaperCard';
+import { ENABLE_UPLOADS } from '../../lib/demoConfig';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const COLUMN_WIDTH = (SCREEN_WIDTH - 44) / 2;
+const COLUMN_WIDTH = (SCREEN_WIDTH - 100) / 2;
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, isGuest, signOut, openAuthModal } = useAuthStore();
-  const { colors, isDark, toggleTheme } = useThemeStore();
+  const { colors, isDark } = useThemeStore();
   const { wallpapers, favorites, downloads } = useWallpaperStore();
 
   const [activeTab, setActiveTab] = useState<'favorites' | 'downloads' | 'collections'>('favorites');
@@ -68,13 +69,6 @@ export default function ProfileScreen() {
     setActiveTab(tab);
   };
 
-  const handleToggleTheme = () => {
-    try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } catch (_) {}
-    toggleTheme();
-  };
-
   const handleUploadPress = () => {
     if (isGuest) {
       openAuthModal('Sign in to upload and share wallpapers with the community');
@@ -94,42 +88,30 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={colors.backgroundGradient}
+        colors={isDark ? colors.backgroundGradient : ['#1973F0', '#64A0F1', '#E5F2FF']}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
 
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={['left', 'right', 'bottom']}>
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
           {/* Top Actions: Theme toggle & Sign In/Out */}
           <View style={styles.topActionsRow}>
-            <TouchableOpacity
-              onPress={handleToggleTheme}
-              activeOpacity={0.7}
-              style={[
-                styles.iconButton,
-                { backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)' },
-              ]}
-            >
-              {isDark ? <Sun size={20} color="#FBBF24" /> : <Moon size={20} color="#0B2050" />}
-            </TouchableOpacity>
-
             <View style={styles.rightButtonsRow}>
-              <TouchableOpacity
-                onPress={handleUploadPress}
-                activeOpacity={0.7}
-                style={[
-                  styles.uploadPill,
-                  { backgroundColor: colors.primary },
-                ]}
-              >
-                <Plus size={16} color="#FFFFFF" strokeWidth={3} />
-                <Text style={styles.uploadPillText}>Upload</Text>
-              </TouchableOpacity>
+              {ENABLE_UPLOADS ? (
+                <TouchableOpacity
+                  onPress={handleUploadPress}
+                  activeOpacity={0.7}
+                  style={[styles.uploadPill, { backgroundColor: colors.primary }]}
+                >
+                  <Plus size={16} color="#FFFFFF" strokeWidth={3} />
+                  <Text style={styles.uploadPillText}>Upload</Text>
+                </TouchableOpacity>
+              ) : null}
 
               <TouchableOpacity
                 onPress={handleSignOutOrIn}
@@ -173,7 +155,7 @@ export default function ProfileScreen() {
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#0F172A' }]}>
-                {favorites.length * 12 + 10}
+                {favorites.length * 12 + 88}
               </Text>
               <Text style={[styles.statLabel, { color: isDark ? '#A1A1AA' : '#64748B' }]}>
                 saved
@@ -184,7 +166,7 @@ export default function ProfileScreen() {
 
             <View style={styles.statItem}>
               <Text style={[styles.statValue, { color: isDark ? '#FFFFFF' : '#0F172A' }]}>
-                {downloads.length * 8 + 4}
+                {downloads.length * 8 + 32}
               </Text>
               <Text style={[styles.statLabel, { color: isDark ? '#A1A1AA' : '#64748B' }]}>
                 downloads
@@ -277,15 +259,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 30,
     paddingTop: 10,
     paddingBottom: 110,
   },
   topActionsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 0,
   },
   rightButtonsRow: {
     flexDirection: 'row',
@@ -306,67 +288,71 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarSection: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginTop: -14,
+    marginBottom: 8,
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   avatar: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    borderWidth: 3,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    width: 214,
+    height: 214,
+    borderRadius: 107,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.65)',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
   },
   editBadge: {
     position: 'absolute',
-    bottom: 2,
-    right: 2,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    bottom: 0,
+    right: 8,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     backgroundColor: '#0D5DFE',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#FFFFFF',
   },
   userName: {
-    fontSize: 24,
+    fontSize: 32,
+    lineHeight: 38,
     fontFamily: 'SourGummy-Black',
     letterSpacing: -0.5,
   },
   userEmail: {
-    fontSize: 14,
+    fontSize: 16,
+    lineHeight: 20,
     fontFamily: 'SourGummy-Medium',
-    marginTop: 3,
+    marginTop: 2,
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingVertical: 14,
+    paddingVertical: 10,
     paddingHorizontal: 10,
-    marginBottom: 20,
+    marginBottom: 18,
   },
   statItem: {
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 26,
+    fontSize: 28,
     fontFamily: 'SourGummy-Black',
   },
   statLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: 'SourGummy-Bold',
     marginTop: 2,
   },
@@ -380,16 +366,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   tabPill: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
     marginHorizontal: 4,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: 'transparent',
   },
   tabPillActive: {},
   tabPillText: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: 'SourGummy-Bold',
   },
   masonryContainer: {
