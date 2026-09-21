@@ -110,7 +110,7 @@ export const WallpaperCard: React.FC<WallpaperCardProps> = ({
         ]}
       >
         <Image
-          source={{ uri: wallpaper.url }}
+          source={typeof wallpaper.url === 'number' ? wallpaper.url : { uri: wallpaper.url }}
           style={styles.image}
           contentFit="cover"
           transition={250}

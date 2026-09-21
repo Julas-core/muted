@@ -19,6 +19,7 @@ import { useWallpaperStore } from '../store/useWallpaperStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
 import { CATEGORIES } from '../constants/categories';
+import { LOCAL_WALLPAPER_SOURCES } from '../constants/localWallpapers';
 
 export default function UploadModal() {
   const router = useRouter();
@@ -27,16 +28,11 @@ export default function UploadModal() {
   const { colors, isDark } = useThemeStore();
 
   const [title, setTitle] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('minimal');
+  const [selectedCategory, setSelectedCategory] = useState('anime-manga');
   const [sampleIndex, setSampleIndex] = useState(0);
 
   // High-res preview presets for creator submission demonstration
-  const sampleUploads = [
-    'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=1080&q=85',
-    'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=1080&q=85',
-    'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=1080&q=85',
-    'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=1080&q=85',
-  ];
+  const sampleUploads = LOCAL_WALLPAPER_SOURCES.slice(0, 4);
 
   const activeImageUrl = sampleUploads[sampleIndex];
 
@@ -50,6 +46,8 @@ export default function UploadModal() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (_) {}
 
+    const categoryName = CATEGORIES.find((category) => category.id === selectedCategory)?.name || selectedCategory;
+
     addWallpaper({
       id: `user_wp_${Date.now()}`,
       title: title.trim(),
@@ -58,8 +56,8 @@ export default function UploadModal() {
         user?.avatar ||
         'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&q=80',
       url: activeImageUrl,
-      category: selectedCategory,
-      tags: [selectedCategory, 'Community', 'New'],
+      category: categoryName,
+      tags: [categoryName, 'Community', 'New'],
       likesCount: 1,
       downloadCount: 0,
       heightRatio: 1.6,
@@ -90,7 +88,11 @@ export default function UploadModal() {
               { backgroundColor: isDark ? '#18181B' : '#E2E8F0', borderColor: colors.border },
             ]}
           >
-            <Image source={{ uri: activeImageUrl }} style={styles.previewImage} contentFit="cover" />
+            <Image
+              source={typeof activeImageUrl === 'number' ? activeImageUrl : { uri: activeImageUrl }}
+              style={styles.previewImage}
+              contentFit="cover"
+            />
             <TouchableOpacity
               onPress={() => {
                 try {

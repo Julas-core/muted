@@ -22,22 +22,23 @@ interface WallpaperState {
 
 export const useWallpaperStore = create<WallpaperState>((set, get) => ({
   wallpapers: SEED_WALLPAPERS,
-  selectedTastes: ['minimal', 'dark', 'cars'],
+  selectedTastes: ['anime-manga', 'automotive', 'dark-minimalist-oled'],
   favorites: ['w1', 'w3', 'w6'],
   downloads: ['w7', 'w12'],
   searchQuery: '',
   activeExploreTag: 'All',
   categoryWeights: {
-    minimal: 5,
-    dark: 4,
-    cars: 3,
+    'anime & manga': 5,
+    automotive: 4,
+    'dark minimalist & oled': 3,
   },
 
   setTastes: (tastes: string[]) =>
     set((state) => {
       const newWeights = { ...state.categoryWeights };
       tastes.forEach((t) => {
-        newWeights[t.toLowerCase()] = (newWeights[t.toLowerCase()] || 0) + 5;
+        const normalizedTaste = t.replace(/-/g, ' ').toLowerCase();
+        newWeights[normalizedTaste] = (newWeights[normalizedTaste] || 0) + 5;
       });
       return { selectedTastes: tastes, categoryWeights: newWeights };
     }),

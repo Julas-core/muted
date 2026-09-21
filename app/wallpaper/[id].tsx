@@ -9,6 +9,7 @@ import {
   Alert,
   Animated,
   Modal,
+  Image as NativeImage,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
@@ -52,6 +53,7 @@ export default function WallpaperDetailScreen() {
 
   const [downloading, setDownloading] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
+  const [downloadNoticeVisible, setDownloadNoticeVisible] = useState(false);
   const [previewMode, setPreviewMode] = useState<PreviewMode>('normal');
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
   const [isNotificationPromptOpen, setIsNotificationPromptOpen] = useState(false);
@@ -65,6 +67,10 @@ export default function WallpaperDetailScreen() {
   }, []);
 
   const wallpaper = wallpapers.find((w) => w.id === id) || wallpapers[0];
+  const wallpaperUri =
+    typeof wallpaper.url === 'number'
+      ? NativeImage.resolveAssetSource(wallpaper.url)?.uri
+      : wallpaper.url;
   const isFavorite = favorites.includes(wallpaper.id);
 
   // Spring animations
@@ -129,26 +135,45 @@ export default function WallpaperDetailScreen() {
       return;
     }
 
+    if (Platform.OS === 'web') {
+      Alert.alert('Use the mobile app', 'Saving wallpapers to your phone is available in the iOS and Android app.');
+      return;
+    }
+
+    if (!wallpaperUri) {
+      Alert.alert('Download unavailable', 'This wallpaper could not be prepared for download.');
+      return;
+    }
+
     try {
       setDownloading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-      if (Platform.OS !== 'web') {
-        const { status } = await MediaLibrary.requestPermissionsAsync();
-        if (status === 'granted') {
-          const destination = new File(Paths.document, `${wallpaper.id}.jpg`);
-          const downloadRes = await File.downloadFileAsync(wallpaper.url, destination);
-          await MediaLibrary.saveToLibraryAsync(downloadRes.uri);
-        }
+      let permission = await MediaLibrary.requestPermissionsAsync();
+      if (!permission.granted && permission.status !== 'granted') {
+        permission = await MediaLibrary.getPermissionsAsync();
+      }
+      if (!permission.granted && permission.status !== 'granted') {
+        Alert.alert('Photo access needed', 'Allow Muted to save wallpapers to your photo library, then try again.');
+        return;
       }
 
-      recordDownload(wallpaper.id);
-      setDownloading(false);
-      setDownloaded(true);
+      let downloadedFile: File;
+      if (wallpaperUri.startsWith('file://')) {
+        downloadedFile = new File(wallpaperUri);
+      } else {
+        const destination = new File(Paths.cache, `${wallpaper.id}.jpg`);
+        downloadedFile = destination.exists
+          ? destination
+          : await File.downloadFileAsync(wallpaperUri, destination);
+      }
+      await MediaLibrary.saveToLibraryAsync(downloadedFile.uri);
 
+      recordDownload(wallpaper.id);
+      setDownloaded(true);
+      setDownloadNoticeVisible(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      // Trigger notification permission modal if this is the first download
       if (downloads.length === 0) {
         setTimeout(() => {
           setIsNotificationPromptOpen(true);
@@ -157,11 +182,12 @@ export default function WallpaperDetailScreen() {
 
       setTimeout(() => {
         setDownloaded(false);
+        setDownloadNoticeVisible(false);
       }, 3000);
     } catch (err) {
+      Alert.alert('Could not save wallpaper', 'Please check your connection and photo permissions, then try again.');
+    } finally {
       setDownloading(false);
-      Alert.alert('Download Completed', 'Wallpaper saved to your device collection.');
-      recordDownload(wallpaper.id);
     }
   };
 
@@ -169,9 +195,9 @@ export default function WallpaperDetailScreen() {
     setIsActionSheetOpen(false);
     try {
       if (Platform.OS !== 'web' && (await Sharing.isAvailableAsync())) {
-        await Sharing.shareAsync(wallpaper.url);
+        await Sharing.shareAsync(wallpaperUri);
       } else {
-        Alert.alert('Share', `Check out "${wallpaper.title}" on Muted!\n${wallpaper.url}`);
+        Alert.alert('Share', `Check out "${wallpaper.title}" on Muted!\n${wallpaperUri}`);
       }
     } catch (_) {}
   };
@@ -194,7 +220,7 @@ export default function WallpaperDetailScreen() {
       >
         {/* Full-bleed Wallpaper Image */}
         <Image
-          source={{ uri: wallpaper.url }}
+          source={typeof wallpaper.url === 'number' ? wallpaper.url : { uri: wallpaper.url }}
           style={styles.fullImage}
           contentFit="cover"
           priority="high"
@@ -370,6 +396,17 @@ export default function WallpaperDetailScreen() {
                 </TouchableOpacity>
               </View>
             </BlurView>
+          </View>
+        </View>
+      )}
+
+      {downloadNoticeVisible && (
+        <View pointerEvents="none" style={styles.downloadNotice}>
+          <View style={styles.downloadNoticeContent}>
+            <View style={styles.downloadNoticeIcon}>
+              <Check size={15} color="#0F172A" strokeWidth={3} />
+            </View>
+            <Text style={styles.downloadNoticeText}>Wallpaper saved to your gallery</Text>
           </View>
         </View>
       )}
@@ -699,6 +736,40 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  downloadNotice: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    bottom: 166,
+    alignItems: 'center',
+  },
+  downloadNoticeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  downloadNoticeIcon: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#34D399',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  downloadNoticeText: {
+    color: '#0F172A',
+    fontSize: 13,
+    fontFamily: 'SourGummy-Bold',
   },
   actionBackdrop: {
     flex: 1,

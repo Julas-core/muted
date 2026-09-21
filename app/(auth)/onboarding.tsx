@@ -28,14 +28,14 @@ export default function OnboardingScreen() {
   const { setTastes } = useWallpaperStore();
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
-    'minimal',
-    'cars',
-    'dark',
-    'abstract',
-    'comic',
-    'animals',
-    'anime',
-    'sport',
+    'anime-manga',
+    'automotive',
+    'comics-superheroes',
+    'dark-minimalist-oled',
+    'moody-landscapes-nature',
+    'spiritual-conceptual',
+    'streetwear-urban-culture',
+    'y2k-cyber-graphics',
   ]);
   const [customSearch, setCustomSearch] = useState('');
   const [step, setStep] = useState<'pick' | 'preview'>('pick');
@@ -109,7 +109,7 @@ export default function OnboardingScreen() {
                     ]}
                   >
                     <Image
-                      source={{ uri: cat.image }}
+                      source={cat.image}
                       style={styles.tileImage}
                       contentFit="cover"
                       transition={200}
@@ -172,7 +172,7 @@ export default function OnboardingScreen() {
             <View style={styles.previewGrid}>
               {CATEGORIES.slice(0, 4).map((cat) => (
                 <View key={cat.id} style={styles.previewCard}>
-                  <Image source={{ uri: cat.image }} style={styles.previewImage} contentFit="cover" />
+                  <Image source={cat.image} style={styles.previewImage} contentFit="cover" />
                 </View>
               ))}
             </View>

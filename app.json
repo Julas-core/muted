@@ -25,6 +25,14 @@
     "plugins": [
       "expo-router",
       "expo-image",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Muted to save wallpapers to your photos.",
+          "savePhotosPermission": "Allow Muted to save wallpapers to your photos.",
+          "granularPermissions": ["photo"]
+        }
+      ],
       "expo-sharing",
       "expo-font"
     ]
