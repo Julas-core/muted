@@ -1,8 +1,25 @@
 import { Wallpaper, SEED_WALLPAPERS } from '../../constants/seedWallpapers';
 
-export type SortField = 'likes' | 'downloads' | 'title';
+export type SortField = 'likes' | 'downloads' | 'title' | 'likesCount' | 'downloadCount';
 export type SortDirection = 'asc' | 'desc';
 export type TagMatchMode = 'any' | 'all';
+
+export interface TagFilterConfig {
+  /**
+   * List of tags to filter by.
+   */
+  tags?: string[];
+  values?: string[];
+
+  /**
+   * Tag match mode: 'any' matches if wallpaper contains at least one tag,
+   * 'all' requires wallpaper to contain all specified tags.
+   */
+  match?: TagMatchMode;
+  mode?: TagMatchMode;
+}
+
+export type TagsFilter = string[] | string | TagFilterConfig;
 
 export interface QueryFilter {
   /**
@@ -13,9 +30,10 @@ export interface QueryFilter {
   category?: string | string[];
 
   /**
-   * Filter by one or more tags.
+   * Filter by one or more tags. Supports array of strings, single string,
+   * or a configuration object with match mode.
    */
-  tags?: string[];
+  tags?: TagsFilter;
 
   /**
    * Match strategy when multiple tags are specified:
@@ -24,6 +42,7 @@ export interface QueryFilter {
    */
   tagMatchMode?: TagMatchMode;
   tagsMatch?: TagMatchMode; // Alias for convenience
+  match?: TagMatchMode; // Alias for convenience
 
   /**
    * Minimum like count (inclusive).
@@ -36,12 +55,14 @@ export interface QuerySort {
    * Field to sort by: 'likes' (likesCount), 'downloads' (downloadCount), or 'title'.
    */
   by?: SortField;
+  field?: SortField;
 
   /**
    * Sort direction: 'asc' or 'desc'.
    * Defaults to 'desc' for 'likes' and 'downloads', and 'asc' for 'title'.
    */
   direction?: SortDirection;
+  order?: SortDirection;
 }
 
 export interface QueryPagination {
@@ -51,7 +72,8 @@ export interface QueryPagination {
   limit?: number;
 
   /**
-   * Cursor identifier (wallpaper ID). Slicing starts immediately after this item.
+   * Cursor identifier (wallpaper ID or numeric offset string).
+   * Slicing starts immediately after this item.
    */
   cursor?: string | null;
 
@@ -70,7 +92,7 @@ export interface QueryOptions {
   /**
    * Sorting options.
    */
-  sort?: QuerySort;
+  sort?: QuerySort | SortField;
 
   /**
    * Cursor-based / offset pagination options.
@@ -84,9 +106,10 @@ export interface QueryOptions {
 
   // Flattened shortcuts for developer convenience
   category?: string | string[];
-  tags?: string[];
+  tags?: TagsFilter;
   tagMatchMode?: TagMatchMode;
   tagsMatch?: TagMatchMode;
+  match?: TagMatchMode;
   minLikes?: number;
   sortBy?: SortField;
   sortDirection?: SortDirection;
@@ -121,11 +144,11 @@ function matchesCategory(wallpaperCategory: string, targetCategory: string): boo
     return true;
   }
   const targetLower = targetCategory.trim().toLowerCase();
-  const wallpaperLower = wallpaperCategory.trim().toLowerCase();
+  const wallpaperLower = (wallpaperCategory || '').trim().toLowerCase();
   if (targetLower === wallpaperLower) {
     return true;
   }
-  return cleanCategoryKey(wallpaperCategory) === cleanCategoryKey(targetCategory);
+  return cleanCategoryKey(wallpaperCategory || '') === cleanCategoryKey(targetCategory);
 }
 
 /**
@@ -151,10 +174,10 @@ export class WallpaperDatabase {
       // Fallback to top-level flattened options if present
       category = filter?.category,
       tags = filter?.tags,
-      tagMatchMode = filter?.tagMatchMode ?? filter?.tagsMatch ?? 'any',
+      tagMatchMode = filter?.tagMatchMode ?? filter?.tagsMatch ?? filter?.match ?? 'any',
       minLikes = filter?.minLikes,
-      sortBy = sort?.by,
-      sortDirection = sort?.direction,
+      sortBy = typeof sort === 'string' ? sort : (sort?.by ?? sort?.field),
+      sortDirection = typeof sort === 'object' ? (sort?.direction ?? sort?.order) : undefined,
       limit = pagination?.limit,
       cursor = pagination?.cursor,
       offset = pagination?.offset,
@@ -177,13 +200,29 @@ export class WallpaperDatabase {
     }
 
     // 2. Filter: Tags (any / all match)
-    if (tags && tags.length > 0) {
-      const normalizedFilterTags = tags.map((t) => t.trim().toLowerCase()).filter(Boolean);
+    let filterTags: string[] = [];
+    let effectiveTagMatchMode: TagMatchMode = tagMatchMode;
+
+    if (Array.isArray(tags)) {
+      filterTags = tags;
+    } else if (typeof tags === 'string') {
+      filterTags = [tags];
+    } else if (tags && typeof tags === 'object') {
+      const config = tags as TagFilterConfig;
+      filterTags = config.values || config.tags || [];
+      if (config.match) effectiveTagMatchMode = config.match;
+      if (config.mode) effectiveTagMatchMode = config.mode;
+    }
+
+    if (filterTags.length > 0) {
+      const normalizedFilterTags = filterTags.map((t) => t.trim().toLowerCase()).filter(Boolean);
 
       if (normalizedFilterTags.length > 0) {
         result = result.filter((item) => {
-          const itemTags = (item.tags || []).map((t) => t.trim().toLowerCase());
-          if (tagMatchMode === 'all') {
+          const itemTags = Array.isArray(item.tags)
+            ? item.tags.map((t) => (t || '').trim().toLowerCase())
+            : [];
+          if (effectiveTagMatchMode === 'all') {
             return normalizedFilterTags.every((ft) => itemTags.includes(ft));
           }
           // Default: 'any'
@@ -194,7 +233,7 @@ export class WallpaperDatabase {
 
     // 3. Filter: minLikes
     if (typeof minLikes === 'number' && !Number.isNaN(minLikes)) {
-      result = result.filter((item) => item.likesCount >= minLikes);
+      result = result.filter((item) => (item.likesCount ?? 0) >= minLikes);
     }
 
     // 4. Search Query: case-insensitive across title, author, and tags
@@ -203,9 +242,11 @@ export class WallpaperDatabase {
       const tokens = q.split(/\s+/).filter(Boolean);
 
       result = result.filter((item) => {
-        const titleLower = item.title.toLowerCase();
-        const authorLower = item.author.toLowerCase();
-        const tagsLower = (item.tags || []).map((t) => t.toLowerCase());
+        const titleLower = (item.title || '').toLowerCase();
+        const authorLower = (item.author || '').toLowerCase();
+        const tagsLower = Array.isArray(item.tags)
+          ? item.tags.map((t) => (t || '').toLowerCase())
+          : [];
 
         // Full query direct substring match
         const directMatch =
@@ -231,18 +272,19 @@ export class WallpaperDatabase {
 
     // 5. Sort: by 'likes' | 'downloads' | 'title', direction 'asc' | 'desc'
     if (sortBy) {
+      const isTitle = sortBy === 'title';
       const dir =
-        sortDirection ?? (sortBy === 'title' ? 'asc' : 'desc');
+        sortDirection ?? (isTitle ? 'asc' : 'desc');
       const multiplier = dir === 'asc' ? 1 : -1;
 
       result.sort((a, b) => {
         let comparison = 0;
-        if (sortBy === 'likes') {
-          comparison = a.likesCount - b.likesCount;
-        } else if (sortBy === 'downloads') {
-          comparison = a.downloadCount - b.downloadCount;
+        if (sortBy === 'likes' || (sortBy as string) === 'likesCount') {
+          comparison = (a.likesCount ?? 0) - (b.likesCount ?? 0);
+        } else if (sortBy === 'downloads' || (sortBy as string) === 'downloadCount') {
+          comparison = (a.downloadCount ?? 0) - (b.downloadCount ?? 0);
         } else if (sortBy === 'title') {
-          comparison = a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+          comparison = (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' });
         }
 
         if (comparison !== 0) {
@@ -250,7 +292,7 @@ export class WallpaperDatabase {
         }
 
         // Stable tie-breaker by ID
-        return a.id.localeCompare(b.id);
+        return (a.id || '').localeCompare(b.id || '');
       });
     }
 
@@ -265,6 +307,11 @@ export class WallpaperDatabase {
         startIndex = cursorIndex + 1;
       } else if (typeof offset === 'number' && offset >= 0) {
         startIndex = offset;
+      } else {
+        const parsedOffset = Number(cursor);
+        if (!Number.isNaN(parsedOffset) && parsedOffset >= 0 && Number.isInteger(parsedOffset)) {
+          startIndex = parsedOffset;
+        }
       }
     } else if (typeof offset === 'number' && offset >= 0) {
       startIndex = offset;
@@ -409,6 +456,13 @@ export function getCategoryCounts(
 }
 
 /**
+ * Retrieves all wallpapers from the singleton database.
+ */
+export function getAllWallpapers(): Wallpaper[] {
+  return wallpaperDb.getAll();
+}
+
+/**
  * Retrieves a wallpaper by ID from the database.
  */
 export function getWallpaperById(id: string): Wallpaper | undefined {
@@ -420,7 +474,7 @@ export function getWallpaperById(id: string): Wallpaper | undefined {
  */
 export function getWallpapersByCategory(
   category: string | string[],
-  options?: Omit<QueryOptions, 'filter' | 'category'>
+  options?: Omit<QueryOptions, 'category'>
 ): QueryResult<Wallpaper> {
   return wallpaperDb.query({
     ...options,
@@ -455,6 +509,34 @@ export function getTopWallpapers(
     sort: { by, direction: 'desc' },
     pagination: { limit },
   }).items;
+}
+
+/**
+ * Inserts or replaces a wallpaper in the singleton database.
+ */
+export function addWallpaper(wallpaper: Wallpaper): void {
+  wallpaperDb.addWallpaper(wallpaper);
+}
+
+/**
+ * Updates a wallpaper by ID in the singleton database.
+ */
+export function updateWallpaper(id: string, updates: Partial<Wallpaper>): Wallpaper | undefined {
+  return wallpaperDb.updateWallpaper(id, updates);
+}
+
+/**
+ * Deletes a wallpaper by ID from the singleton database.
+ */
+export function deleteWallpaper(id: string): boolean {
+  return wallpaperDb.deleteWallpaper(id);
+}
+
+/**
+ * Resets the singleton database to the original seed data or a custom dataset.
+ */
+export function resetWallpaperDatabase(seedData?: Wallpaper[]): void {
+  wallpaperDb.reset(seedData);
 }
 
 export type { Wallpaper };
